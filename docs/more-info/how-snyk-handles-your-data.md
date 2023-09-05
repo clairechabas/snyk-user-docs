@@ -4,6 +4,73 @@ Snyk is a developer security platform, and thus Snyk places the utmost importanc
 
 The data handled by Snyk varies depending on the product you are using, how you are integrating with Snyk and your Snyk deployment. Because Snyk is subject to fast-moving changes, the types of data accessed and stored might change with the introduction of a new capability or changes to an existing capability.
 
+Adding something here
+
+
+
+```typescript
+import {
+    CachedFirestoreReader,
+    getSpaceRef,
+    getUserPermissionsRef,
+    authenticateFirebaseAsAdmin,
+    getUserPermissionsVisibleSpaces,
+} from '@gitbook/app-database';
+
+import { KEY_FIELD_SELF, encodeItemsList, encodeSpace } from '../../../encoders';
+import { createAPIOperationHandler } from '../../../handler';
+import { assertOrganizationPermissions } from '../../../security';
+
+/**
+ * List all spaces a org member can access.
+ */
+export const listSpacesForOrganizationMember = createAPIOperationHandler(
+    'listSpacesForOrganizationMember',
+    async (request, context) => {
+        const { organizationId, userId } = request.params;
+
+        const reader = new CachedFirestoreReader();
+
+        await authenticateFirebaseAsAdmin();
+        await assertOrganizationPermissions(
+            reader,
+            context.auth.state,
+            organizationId,
+            'view-member-permissions'
+        );
+
+        const memberUserPermissions = await reader.assertDocument(getUserPermissionsRef(userId));
+        const spaceKeys = getUserPermissionsVisibleSpaces(
+            memberUserPermissions,
+            organizationId
+        ).sort();
+
+        return {
+            statusCode: 200,
+            body: await encodeItemsList(
+                spaceKeys,
+                async (spaceKey) => {
+                    const spaceRef = getSpaceRef(spaceKey);
+                    const space = await reader.assertDocument(spaceRef);
+                    return {
+                        space: await encodeSpace(space),
+                        permission: memberUserPermissions.spaces[spaceKey]?.level!,
+                    };
+                },
+                { ...request.query, count: true },
+                {
+                    keyField: KEY_FIELD_SELF,
+                }
+            ),
+        };
+    }
+);
+```
+
+![](https://images.unsplash.com/photo-1691732618326-94216d86536f?crop=entropy\&cs=srgb\&fm=jpg\&ixid=M3wxOTcwMjR8MHwxfHJhbmRvbXx8fHx8fHx8fDE2OTM5MjU1ODZ8\&ixlib=rb-4.0.3\&q=85)
+
+This looks like a subway no?
+
 ## Flexible deployment options
 
 Snyk leverages the latest software development practices and technologies to provide customers with the flexibility to use Snyk’s developer security platform in the manner that best suits the needs of their business.
@@ -36,7 +103,7 @@ Snyk knows how important it is for you to protect your data. Snyk products only 
 
 {% tabs %}
 {% tab title="Snyk Open Source" %}
-### **Snyk Open Source**
+#### **Snyk Open Source**
 
 ![Snyk Open Source](../.gitbook/assets/SnykOSS.svg)
 
@@ -57,7 +124,7 @@ Your account is subject to contract terms which might restrict your ability to e
 {% endtab %}
 
 {% tab title="Snyk Code" %}
-### **Snyk Code**
+#### **Snyk Code**
 
 ![Snyk Code](../.gitbook/assets/SnykCode.svg)
 
@@ -72,7 +139,7 @@ Your account is subject to contract terms which might restrict your ability to e
 {% endtab %}
 
 {% tab title="Snyk Container" %}
-### **Snyk Container**
+#### **Snyk Container**
 
 ![Snyk Container](<../.gitbook/assets/image (201) (1).png>)
 
@@ -84,7 +151,7 @@ Your account is subject to contract terms which might restrict your ability to e
 {% endtab %}
 
 {% tab title="Snyk IaC" %}
-### **Snyk Infrastructure as Code**
+#### **Snyk Infrastructure as Code**
 
 ![Snyk Infrastructure as Code](../.gitbook/assets/SnykIaC.svg)
 
@@ -94,7 +161,7 @@ Your account is subject to contract terms which might restrict your ability to e
 * For drift detection via `snyk iac describe`, Snyk relies on the principle of least privilege and requires only read-only access to [AWS](../scan-infrastructure/snyk-infrastructure-as-code/detect-drift-and-manually-created-resources/configure-cloud-providers/configure-aws-provider.md#least-privileged-policy), [Azure](../scan-infrastructure/snyk-infrastructure-as-code/detect-drift-and-manually-created-resources/configure-cloud-providers/configure-azure-provider.md#least-privileged-policy), [Google](../scan-infrastructure/snyk-infrastructure-as-code/detect-drift-and-manually-created-resources/configure-cloud-providers/configure-google-provider.md#least-privileged-policy), or [GitHub](../scan-infrastructure/snyk-infrastructure-as-code/detect-drift-and-manually-created-resources/configure-cloud-providers/configure-github-provider.md#least-privileged-policy). Provider credentials are not sent to or stored by Snyk.
 * Snyk relies on local read-only Terraform State file access and extracts and sends relevant resource configuration data to the platform.
 
-### IaC+
+#### IaC+
 
 * Snyk Cloud scans cloud platform APIs to gather information on configured infrastructure deployed in AWS Accounts and Google Cloud Subscriptions.
 * To perform scans, Snyk relies on the principle of least privilege, leveraging different authentication mechanisms which are supported by each Cloud platform.
