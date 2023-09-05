@@ -35,7 +35,7 @@ The following Enterprise features are limited or unavailable during the trial:
 * [**Custom Project Tags**](../manage-issues/snyk-projects/project-tags.md)**:** Not available.
 * [**Custom User Roles**](../snyk-admin/manage-users-and-permissions/member-roles.md): Not available.
 * [**Audit Logging**](../snyk-admin/manage-users-and-permissions/audit-logs.md): Not available.
-* [**Local Code Engine**](broken-reference): Not available.
+* [**Local Code Engine**](broken-reference/): Not available.
 * [**Broker**](../enterprise-setup/snyk-broker/): Not available.
 * [**Self-hosted Git**](../integrations/git-repository-scm-integrations/snyk-github-enterprise-integration.md): Not available.
 * [**Private Registry Integrations**](../integrations/package-repository-integrations/): Not available.
@@ -43,3 +43,78 @@ The following Enterprise features are limited or unavailable during the trial:
 {% hint style="info" %}
 Need more help? [Contact Snyk Support](https://support.snyk.io/hc/en-us/requests/new).
 {% endhint %}
+
+I'm adding some big block of code right there
+
+```tsx
+// Some code
+import * as React from 'react';
+import { ImageURISource } from 'react-native';
+
+import { sizes } from '../constants';
+import { Image } from '../Image';
+import { CSSIconComponent, IconComponent, IconProps } from '@gitbook/spine-icons';
+
+/**
+ * Hook to create an icon component from an "icon like" component that requires other props.
+ */
+export function useCreateIcon<OtherProps>(
+    C: React.ComponentType<IconProps & OtherProps>,
+    props: OtherProps & IconProps,
+    dependencies?: any[]
+): IconComponent {
+    const icon = React.useCallback(
+        (iconProps) => <C {...iconProps} {...props} />,
+        dependencies || []
+    );
+    return icon;
+}
+
+/**
+ * Create an icon component from an "icon like" component that requires other props.
+ */
+export function createIcon<OtherProps>(
+    C: React.ComponentType<IconProps & OtherProps>,
+    props: Partial<IconProps> & OtherProps
+): IconComponent {
+    return (iconProps) => <C {...iconProps} {...props} />;
+}
+
+/**
+ * Convert an icon to a CSS icon.
+ * It should also be used for non-svg icons in the app where only `size` is used.
+ */
+export function toCSSIcon(C: IconComponent): CSSIconComponent {
+    return (props) => {
+        if (!props.compatibilitySize) {
+            throw new Error(
+                'toCSSIcon: compatibilitySize is required to be passed to the CSS icon.'
+            );
+        }
+
+        return <C size={props.compatibilitySize} />;
+    };
+}
+
+/**
+ * Render an image as an icon.
+ */
+export function ImageIcon(
+    props: {
+        source: ImageURISource;
+        borderRadius?: number;
+    } & IconProps
+): React.ReactElement {
+    const { source, size, style, dataSet, borderRadius = sizes.RADIUS_M } = props;
+
+    return (
+        <Image
+            source={source}
+            // @ts-ignore
+            style={[{ width: size, height: size, borderRadius }, style]}
+            // @ts-ignore dataSet is a RNW specific prop
+            dataSet={dataSet}
+        />
+    );
+}
+```
