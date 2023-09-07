@@ -911,3 +911,4 @@
     * [Disclose a vulnerability in an open source package](more-info/disclosing-vulnerabilities/disclose-a-vulnerability-in-an-open-source-package.md)
   * [Snyk Learn](more-info/snyk-learn.md)
   * [Error Catalog](more-info/error-catalog.md)
+* [How to be an imperfectionist](how-to-be-an-imperfectionist.md)
